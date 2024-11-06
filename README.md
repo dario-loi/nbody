@@ -3,6 +3,7 @@
 This simple n-body problem simulator was written in a couple of afternoons in the fall of 2024. I wanted to test my open source library [StapleGL](www.github.com/dario-loi/staplegl) by writing some simple graphic application that also performed physics calculations. 
 
 ![GIF](./nbody.gif)
+
 *The gif shows the simulation of 10 bodies with random initial conditions.*
 
 
