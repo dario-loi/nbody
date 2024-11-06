@@ -1,12 +1,12 @@
 /**
  * @file batches.cpp
  * @author Dario Loi
- * @brief Batched rendering example.
- * @date 2023-08-04
+ * @brief n-body problem simulation
+ * @date 2024-11-04
  *
  * @copyright MIT License
  *
- * @example batches.cpp
+ * @example nbody.cpp
  */
 
 #include "glad.h"
@@ -35,7 +35,6 @@ constexpr float BODY_MASS = 2.5e4;
 constexpr float TIME_STEP = 1 / 120.0F;
 constexpr float SIM_BOUNDARY = 100.0F;
 constexpr float SOFTENING = 1e0F;
-uint32_t N_POINTS = 64;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -140,8 +139,9 @@ auto main(int argc, char* argv[]) -> int
     staplegl::shader_program passthrough { "passthrough_shader",
         "./shaders/passthrough_shader.glsl" };
 
+
     staplegl::texture_2d last_frame {
-        std::span<const float> {},
+        {},
         staplegl::resolution { SCR_WIDTH, SCR_HEIGHT },
         staplegl::texture_color {
             .internal_format = GL_RGB8, .format = GL_RGB, .datatype = GL_UNSIGNED_BYTE },
@@ -150,7 +150,7 @@ auto main(int argc, char* argv[]) -> int
     };
 
     staplegl::texture_2d this_frame {
-        std::span<const float> {},
+        {},
         staplegl::resolution { SCR_WIDTH, SCR_HEIGHT },
         staplegl::texture_color {
             .internal_format = GL_RGB8, .format = GL_RGB, .datatype = GL_UNSIGNED_BYTE },

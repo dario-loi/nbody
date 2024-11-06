@@ -15,8 +15,9 @@ void main()
 }
 
 #type fragment
-
 #version 420 core
+
+#line 20
 
 layout(location = 0) in vec2 Uv;
 
@@ -25,13 +26,12 @@ uniform float u_time_delta;
 
 layout(location = 0) out vec4 FragColor;
 
-const float tau = 0.1F;
+const float tau = 0.2F;
 void main()
 {
     const vec4 last_color = texture(u_last_frame, Uv);
 
-    // EWMA blending
-    const vec4 c = mix(last_color, vec4(0.0), 1- exp(-u_time_delta / tau));
+    const vec4 c = last_color * (exp(-u_time_delta / tau));
 
     FragColor = c;
 }
