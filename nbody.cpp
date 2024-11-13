@@ -139,7 +139,6 @@ auto main(int argc, char* argv[]) -> int
     staplegl::shader_program passthrough { "passthrough_shader",
         "./shaders/passthrough_shader.glsl" };
 
-
     staplegl::texture_2d last_frame {
         {},
         staplegl::resolution { SCR_WIDTH, SCR_HEIGHT },
@@ -165,8 +164,12 @@ auto main(int argc, char* argv[]) -> int
 
     using namespace staplegl::shader_data_type;
 
-    staplegl::vertex_buffer_layout const layout {
+    staplegl::vertex_buffer_layout const layout_pos {
         { u_type::vec2, "aPos" }
+    };
+
+    staplegl::vertex_buffer_layout const layout_col {
+        { u_type::vec3, "aCol" }
     };
 
     staplegl::vertex_buffer_layout const screen_quad_layout {
@@ -202,8 +205,11 @@ auto main(int argc, char* argv[]) -> int
     sim.a = new glm::vec2[N_POINTS];
     sim.m = new float[N_POINTS];
 
+    auto* const colors = new glm::vec3[N_POINTS];
+
     auto dist = std::normal_distribution<float>(0.0F, std::sqrtf(SIM_BOUNDARY) * std::log10f(N_POINTS));
     auto mass_dist = std::normal_distribution<float>(BODY_MASS, std::sqrtf(BODY_MASS));
+    auto col_dist = std::uniform_real_distribution<float>(0.0F, 1.0F);
     auto rng = std::mt19937_64(std::random_device {}());
 
     for (uint16_t i = 0; i < N_POINTS; ++i) {
@@ -211,20 +217,26 @@ auto main(int argc, char* argv[]) -> int
         sim.v[i] = { 0.0F, 0.0F };
         sim.a[i] = { 0.0F, 0.0F };
         sim.m[i] = mass_dist(rng);
+        colors[i] = { col_dist(rng), col_dist(rng), col_dist(rng) };
     }
 
     basic.bind();
     basic.upload_uniform1f("uScale", SIM_BOUNDARY);
 
-    staplegl::vertex_buffer VBO({ reinterpret_cast<float*>(sim.p),
-                                    N_POINTS * 2 },
-        staplegl::driver_draw_hint::DYNAMIC_DRAW);
+    staplegl::vertex_buffer VBO_pos({ reinterpret_cast<float*>(sim.p),
+                                        N_POINTS * 2 },
+        layout_pos,
+        staplegl::driver_draw_hint::STREAM_DRAW);
 
-    VBO.set_layout(layout);
+    staplegl::vertex_buffer VBO_color(
+        { reinterpret_cast<float*>(colors), N_POINTS * 3 },
+        layout_col,
+        staplegl::driver_draw_hint::STATIC_DRAW);
 
     staplegl::vertex_array VAO;
 
-    VAO.add_vertex_buffer(std::move(VBO));
+    VAO.add_vertex_buffer(std::move(VBO_pos));
+    VAO.add_vertex_buffer(std::move(VBO_color));
 
     auto lastTime = glfwGetTime();
     auto acc = 0.0;
