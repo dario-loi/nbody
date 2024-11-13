@@ -132,6 +132,8 @@ auto main(int argc, char* argv[]) -> int
 #endif // STAPLEGL_DEBUG
     // antialiasing and other nice things
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_BLEND);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
     glPointSize(10.0F / (1.0F + std::log10f(N_POINTS)));
 
     staplegl::shader_program basic { "nbody_shader", "./shaders/nbody_shader.glsl" };
@@ -143,7 +145,7 @@ auto main(int argc, char* argv[]) -> int
         {},
         staplegl::resolution { SCR_WIDTH, SCR_HEIGHT },
         staplegl::texture_color {
-            .internal_format = GL_RGB8, .format = GL_RGB, .datatype = GL_UNSIGNED_BYTE },
+            .internal_format = GL_RGBA8, .format = GL_RGBA, .datatype = GL_UNSIGNED_BYTE },
         staplegl::texture_filter {
             .min_filter = GL_LINEAR, .mag_filter = GL_LINEAR, .clamping = GL_CLAMP_TO_EDGE }
     };
@@ -152,7 +154,7 @@ auto main(int argc, char* argv[]) -> int
         {},
         staplegl::resolution { SCR_WIDTH, SCR_HEIGHT },
         staplegl::texture_color {
-            .internal_format = GL_RGB8, .format = GL_RGB, .datatype = GL_UNSIGNED_BYTE },
+            .internal_format = GL_RGBA8, .format = GL_RGBA, .datatype = GL_UNSIGNED_BYTE },
         staplegl::texture_filter {
             .min_filter = GL_LINEAR, .mag_filter = GL_LINEAR, .clamping = GL_CLAMP_TO_EDGE }
     };
@@ -253,6 +255,9 @@ auto main(int argc, char* argv[]) -> int
 
         acc += deltaTime;
 
+        smooth_texture.bind();
+        smooth_texture.upload_uniform1f("u_time_delta", acc);
+
         // STEP PHYSICAL SIMULATION
 
         while (acc >= TIME_STEP) {
@@ -296,9 +301,6 @@ auto main(int argc, char* argv[]) -> int
         post_fbo.bind();
         post_fbo.set_texture(this_frame);
         last_frame.set_unit(0);
-
-        smooth_texture.bind();
-        smooth_texture.upload_uniform1f("u_time_delta", deltaTime);
 
         screen_quad_vao.bind();
 

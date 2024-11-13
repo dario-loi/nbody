@@ -26,12 +26,12 @@ uniform float u_time_delta;
 
 layout(location = 0) out vec4 FragColor;
 
-const float tau = 0.2F;
+const float tau = 1.5;
+
 void main()
 {
-    const vec4 last_color = texture(u_last_frame, Uv);
+    vec4 last_color = texture(u_last_frame, Uv);
+    vec3 c = last_color.rgb - vec3(u_time_delta / tau);
 
-    const vec4 c = last_color * (exp(-u_time_delta / tau));
-
-    FragColor = c;
+    FragColor = vec4(max(c, vec3(0.0)), last_color.a);
 }
